@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Basic Chatroom</title>   
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="all.css">
+</head>
+<body>   
+    <div id="username-popup">
+        <form id="username-form">
+            <div id="avatar-choice-radio-div"></div>
+            Username: 
+            <input type="text" id="username-input" name="username">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div id="logged-in-as">Logged in as:</div> 
+    <div id="chatrooms">
+        <form>
+            Create a Chat Room 
+            <input type="text" id="chat-name" name="chat-name">
+            <button type="submit">Create</button>
+        </form>
+       Available Chatrooms:
+       <div id="chatrooms-list">
+
+       </div>
+    </div>
+    
+    <script src="login.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+/* #chatrooms, #logged-in-as {
+    visibility: hidden;
+} */
+
+.avatar-img {
+    width: 130px;
+    margin: 10px;
+}
+
+.selected-avatar {
+    border: 5px solid red;
+    box-sizing: border-box;
+}
+#avatar-choice-radio-div {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    width: 600px;
+    margin: auto;
+}
+
+#username-form {
+    text-align: center;
+    margin-top: 100px;
+}
+
+#username-input{
+    margin-top: 30px;
+}
