@@ -28,8 +28,11 @@ socketio.on("join_chatroom_to_client", function(data) {
         $("#current-chatroom-leave-button-wrapper").empty()
         $("#current-chatroom-leave-button-wrapper").append(leaveButton)
         $("#current-chatroom-users-list").empty()
+        $("#current-chatroom-users-dropdown").empty()
+        $("#current-chatroom-users-dropdown").append("Send to:<option value='all'>Everyone</option>")
         for(let i = 0; i < data.chatroom.current_users.length; ++i) {
             $("#current-chatroom-users-list").append($("<li>" + data.chatroom.current_users[i] + "</li>"))
+            $("#current-chatroom-users-dropdown").append($("<option value='" + data.chatroom.current_users[i] + "'>" + data.chatroom.current_users[i] + "</option>"))
         }
         $("#current-chatroom-send-message").submit(function(event) {
             event.preventDefault()
@@ -38,8 +41,11 @@ socketio.on("join_chatroom_to_client", function(data) {
     } 
     else if(current_chatroom == data.chatroom.room_name) {
         $("#current-chatroom-users-list").empty()
+        $("#current-chatroom-users-dropdown").empty()
+        $("#current-chatroom-users-dropdown").append("Send to:<option value='all'>Everyone</option>")
         for(let i = 0; i < data.chatroom.current_users.length; ++i) {
             $("#current-chatroom-users-list").append($("<li>" + data.chatroom.current_users[i] + "</li>"))
+            $("#current-chatroom-users-dropdown").append($("<option value='" + data.chatroom.current_users[i] + "'>" + data.chatroom.current_users[i] + "</option>"))
         }
     }
 })
@@ -60,7 +66,12 @@ socketio.on("get_chatrooms_to_client", function(data) {
 
 socketio.on("message_to_client", function(data) {
     if(data.chatroom == current_chatroom) {
-        $("#current-chatroom-messages").append($("<div><img class='small-avatar-image' alt='" + data.avatar + "' src=/avatars/" + data.avatar + ".png><span class='message-div'>" + data.username + ": " + data.message + "</span></div>"))
+        if(data.to_users == "all") {
+            $("#current-chatroom-messages").append($("<div><img class='small-avatar-image' alt='" + data.avatar + "' src=/avatars/" + data.avatar + ".png><div class='message-div'>" + data.username + ": " + data.message + "</div></div>"))
+        }
+        else if(data.to_users == username || data.username == username) {
+            $("#current-chatroom-messages").append($("<div><img class='small-avatar-image' alt='" + data.avatar + "' src=/avatars/" + data.avatar + ".png><div class='message-div'>PRIVATE - " + data.username + ": " + data.message + "</div></div>"))
+        }
     }
 })
 
@@ -73,16 +84,21 @@ socketio.on("leave_chatroom_to_client", function(data) {
     }
     else if(data.chatroom.room_name == current_chatroom) {
         $("#current-chatroom-users-list").empty()
+        $("#current-chatroom-users-dropdown").empty()
+        $("#current-chatroom-users-dropdown").append("Send to:<option value='all'>Everyone</option>")
         for(let i = 0; i < data.chatroom.current_users.length; ++i) {
             $("#current-chatroom-users-list").append($("<li>" + data.chatroom.current_users[i] + "</li>"))
+            $("#current-chatroom-users-dropdown").append($("<option value='" + data.chatroom.current_users[i] + "'>" + data.chatroom.current_users[i] + "</option>"))
         }
     }
 })
 
 function sendMessage(){
     var msg = $("#current-chatroom-message-input").val();
-    $("#current-chatroom-message-input").val("")
-    socketio.emit("message_to_server", {username: username, chatroom:current_chatroom, message:msg});
+    if(msg.trim() != "" && msg) {
+        $("#current-chatroom-message-input").val("")
+        socketio.emit("message_to_server", {username: username, chatroom:current_chatroom, message:msg, to_users:$("#current-chatroom-users-dropdown").val()});
+    }
 }
 
 function leaveCurrentChatroom() {

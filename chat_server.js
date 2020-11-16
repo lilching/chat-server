@@ -112,8 +112,8 @@ io.sockets.on("connection", function (socket) {
             
             socket.on('message_to_server', function (data) {
                 // This callback runs when the server receives a new message from the client.
-                console.log("message from " + data["username"] + " to " + data["chatroom"] + ": " + data["message"]); // log it to the Node.JS output
-                io.sockets.emit("message_to_client", {username: data["username"], avatar: usersDict[data["username"]], chatroom: data["chatroom"], message: data["message"]}) // broadcast the message to other users
+                console.log("message from " + data["username"] + " to " + data["to_users"] + " in " + data["chatroom"] + ": " + data["message"]); 
+                io.sockets.emit("message_to_client", {username: data["username"], avatar: usersDict[data["username"]], chatroom: data["chatroom"], message: data["message"], to_users: data["to_users"]}) 
             });
 
             socket.on("leave_chatroom_to_server", function (data) {
