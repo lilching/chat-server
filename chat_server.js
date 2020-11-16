@@ -10,14 +10,16 @@ var http = require('http'),
 const port = 80;
 const file = "login.html";
 let usersDict = {}
-let chatrooms = []
+let chatroomsDict = {}
+let chatroomsList = []
 
-class chatroom {
+class Chatroom {
     constructor(room_name, owner) {
-        this.owner = owner;
-        this.room_name = room_name;
-        this.current_users = [owner]
-        chatrooms.append(this.room_name)
+        this.owner = owner
+        this.room_name = room_name
+        this.current_users = []
+        chatroomsDict[room_name] = this;
+        chatroomsList.push(room_name)
     }
 }
 //servers <- contains owner, ban list, present users
@@ -84,19 +86,48 @@ const io = socketio.listen(server);
 io.sockets.on("connection", function (socket) {
     // This callback runs when a new Socket.IO connection is established.
 
-    socket.on('message_to_server', function (data) {
-        // This callback runs when the server receives a new message from the client.
-
-        console.log("message: " + data["message"]); // log it to the Node.JS output
-        io.sockets.emit("message_to_client", { message: data["message"] }) // broadcast the message to other users
-    });
-
     socket.on("login_to_server", function(data) {
         console.log("New user logged in, username: " + data["username"] + " and color: " + data["color"]);
         usersDict[data["username"]] = data["color"]
-        for(var key in usersDict){
-            console.log(usersDict[key])
-        }
-        io.sockets.emit("chatrooms_to_client", {chatrooms: chatrooms})
+        // io.sockets.emit("chatrooms_to_client", {chatrooms: chatrooms})
+
+        socket.on("get_chatrooms_to_server", function(data) {
+            console.log("user " + data["username"] + " getting list of available chatrooms")
+            io.sockets.emit("get_chatrooms_to_client", {username: data["username"], available_chatrooms: chatroomsList})
+        })
+
+        socket.on("create_chatroom_to_server", function(data) {
+            console.log("New chat created by " + data["username"] + " with chat name " + data["chat_name"]);
+            newChatroom = new Chatroom(data["chat_name"], data["username"]);
+            io.sockets.emit("create_chatroom_to_client", {username: data["username"], chatrooms: newChatroom.room_name})
+        })
+
+        
+        socket.on("join_chatroom_to_server", function(data) {
+            console.log(data["username"] + " joining chatroom " + data["chat_name"]);
+            let joinedChatroom = chatroomsDict[data["chat_name"]]
+            joinedChatroom.current_users.push(data["username"])
+            io.sockets.emit("join_chatroom_to_client", {username: data["username"], chatroom: joinedChatroom})
+        
+            
+            socket.on('message_to_server', function (data) {
+                // This callback runs when the server receives a new message from the client.
+                console.log("message from " + data["username"] + " to " + data["chatroom"] + ": " + data["message"]); // log it to the Node.JS output
+                io.sockets.emit("message_to_client", {username: data["username"], avatar: usersDict[data["username"]], chatroom: data["chatroom"], message: data["message"]}) // broadcast the message to other users
+            });
+
+            socket.on("leave_chatroom_to_server", function (data) {
+                console.log(data["username"] + " leaving chatroom " + data["chatroom"])
+                let chatroomToLeave = chatroomsDict[data["chatroom"]]
+                let newCurrentUsers = []
+                for(let i = 0; i < chatroomToLeave.current_users.length; ++i) {
+                    if(data["username"] != chatroomToLeave.current_users[i]) {
+                        newCurrentUsers.push(chatroomToLeave.current_users[i])
+                    }
+                }
+                chatroomToLeave.current_users = newCurrentUsers
+                io.sockets.emit("leave_chatroom_to_client", {username:data["username"], chatroom:chatroomToLeave})
+            })
+        }) 
     })
 });

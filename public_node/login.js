@@ -2,11 +2,12 @@ var socketio = io.connect()
 let avatarColors = ["black", "blue", "brown", "cyan", "green", "lime", "orange", "pink", "purple", "red", "white", "yellow"]
 let selected_color = "black" 
 let username = ""
+let current_chatroom = ""
 
 function init() {
     $("#chatrooms").hide()
     $("#logged-in-as").hide()
-    
+    $("#current-chatroom-div").hide()
     addAvatarRadio()
     $("#username-form").submit(checkUsername)
 }
@@ -33,30 +34,6 @@ function addAvatarRadio() {
 init();
 
 
-socketio.on("message_to_client",function(data) {
-    //Append an HR thematic break and the escaped HTML of the new message
-    document.getElementById("chatlog").appendChild(document.createElement("hr"));
-    document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
-});
-socketio.on("chatrooms_to_client", function(data) {
-    chatrooms = data["chatrooms"]
-    for(let i = 0; i < chatrooms.length; ++i){
-        button = $("<button type='submit'>Join</button")
-        button.submit({chatroom_name: chatrooms[i]}, sendJoinChatroom(event))
-        document.getElementById("chatrooms-list").appendChild($(chatrooms[i] + button))
-    }
-})
-
-function sendJoinChatroom(event) {
-    event.preventDefault()
-    console.log("trying to join " + event.data.chatroom_name)
-}
-
-function sendMessage(){
-    var msg = document.getElementById("message_input").value;
-    socketio.emit("message_to_server", {message:msg});
-}
-
 function sendLogin(){
     socketio.emit("login_to_server", {username:username, color:selected_color})
 }
@@ -78,9 +55,8 @@ function login(event) {
     $("#logged-in-as").text($("#logged-in-as").text() + " " + username)
     $("#logged-in-as").show()
     $("#username-form").hide()
-
-    //call to socket to log in and get chatrooms
-
     $("#chatrooms").show()
+    
+    socketio.emit("get_chatrooms_to_server", {username:username})
 }
 

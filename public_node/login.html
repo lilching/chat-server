@@ -11,23 +11,42 @@
         <form id="username-form">
             <div id="avatar-choice-radio-div"></div>
             Username: 
-            <input type="text" id="username-input" name="username">
+            <input type="text" id="username-input" name="username" maxlength="15">
             <button type="submit">Submit</button>
         </form>
     </div>
     <div id="logged-in-as">Logged in as:</div> 
     <div id="chatrooms">
-        <form>
+        <form id="create-chat-form">
             Create a Chat Room 
-            <input type="text" id="chat-name" name="chat-name">
+            <input type="text" id="create-chat-name" name="create-chat-name" maxlength="20">
             <button type="submit">Create</button>
         </form>
        Available Chatrooms:
-       <div id="chatrooms-list">
+       <ul id="chatrooms-list">
 
-       </div>
+       </ul>
+    </div>
+    <div id="current-chatroom-div">
+        <h2 id="current-chatroom-name">Chatroom Name Here</h2>
+        <div id="current-chatroom-leave-button-wrapper"></div>
+        <div id="current-chatroom-users-list-wrapper">
+            <h4>Online:</h4>
+            <ul id="current-chatroom-users-list">
+            </ul>
+        </div>
+        <div id="current-chatroom-messages">
+        </div>
+        <form id="current-chatroom-send-message">
+            <input type="text" id="current-chatroom-message-input" maxlength="80">
+            <button type="submit">Send</button>
+        </form>
+
+        
+        
     </div>
     
     <script src="login.js"></script>
+    <script src="chatrooms.js"></script>
 </body>
 </html>
