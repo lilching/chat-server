@@ -91,6 +91,11 @@ io.sockets.on("connection", function (socket) {
         usersDict[data["username"]] = data["color"]
         // io.sockets.emit("chatrooms_to_client", {chatrooms: chatrooms})
 
+        socket.on("logout_to_server", function(data) {
+            console.log("user "+ data["username"]+ " signing out of " + data["current_chatroom"])
+            delete usersDict[data["username"]]
+        })
+
         socket.on("get_chatrooms_to_server", function(data) {
             console.log("user " + data["username"] + " getting list of available chatrooms")
             io.sockets.emit("get_chatrooms_to_client", {username: data["username"], available_chatrooms: chatroomsList})
@@ -108,26 +113,24 @@ io.sockets.on("connection", function (socket) {
             let joinedChatroom = chatroomsDict[data["chat_name"]]
             joinedChatroom.current_users.push(data["username"])
             io.sockets.emit("join_chatroom_to_client", {username: data["username"], chatroom: joinedChatroom})
-        
-            
-            socket.on('message_to_server', function (data) {
-                // This callback runs when the server receives a new message from the client.
-                console.log("message from " + data["username"] + " to " + data["to_users"] + " in " + data["chatroom"] + ": " + data["message"]); 
-                io.sockets.emit("message_to_client", {username: data["username"], avatar: usersDict[data["username"]], chatroom: data["chatroom"], message: data["message"], to_users: data["to_users"]}) 
-            });
-
-            socket.on("leave_chatroom_to_server", function (data) {
-                console.log(data["username"] + " leaving chatroom " + data["chatroom"])
-                let chatroomToLeave = chatroomsDict[data["chatroom"]]
-                let newCurrentUsers = []
-                for(let i = 0; i < chatroomToLeave.current_users.length; ++i) {
-                    if(data["username"] != chatroomToLeave.current_users[i]) {
-                        newCurrentUsers.push(chatroomToLeave.current_users[i])
-                    }
-                }
-                chatroomToLeave.current_users = newCurrentUsers
-                io.sockets.emit("leave_chatroom_to_client", {username:data["username"], chatroom:chatroomToLeave})
-            })
         }) 
+        socket.on('message_to_server', function (data) {
+            // This callback runs when the server receives a new message from the client.
+            console.log("message from " + data["username"] + " to " + data["to_users"] + " in " + data["chatroom"] + ": " + data["message"]); 
+            io.sockets.emit("message_to_client", {username: data["username"], avatar: usersDict[data["username"]], chatroom: data["chatroom"], message: data["message"], to_users: data["to_users"]}) 
+        });
+
+        socket.on("leave_chatroom_to_server", function (data) {
+            console.log(data["username"] + " leaving chatroom " + data["chatroom"])
+            let chatroomToLeave = chatroomsDict[data["chatroom"]]
+            let newCurrentUsers = []
+            for(let i = 0; i < chatroomToLeave.current_users.length; ++i) {
+                if(data["username"] != chatroomToLeave.current_users[i]) {
+                    newCurrentUsers.push(chatroomToLeave.current_users[i])
+                }
+            }
+            chatroomToLeave.current_users = newCurrentUsers
+            io.sockets.emit("leave_chatroom_to_client", {username:data["username"], chatroom:chatroomToLeave})
+        })
     })
 });
