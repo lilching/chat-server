@@ -21,6 +21,7 @@ let current_chatroom = ""
 //     sessionStorage.setItem('reload', false);
 // }
 
+init();
 
 function init() {
     $("#chatrooms").hide()
@@ -29,20 +30,21 @@ function init() {
     addAvatarRadio()
     $("#username-form").submit(checkUsername)
 
-
     $("#current-chatroom-leave-button").click(function(event) {
         event.preventDefault()
         leaveCurrentChatroom()
     })
     $("#current-chatroom-send-message").on("submit", function(event) {
-        console.log("submitted")
         event.preventDefault()
         sendMessage()
+    })
+    $("#create-chat-form").submit(function(event) {
+        event.preventDefault();
+        sendCreateNewChat();
     })
 }
 
 function sendLeaveAndLogout() {
-    console.log("leave and logout")
     if(username != "" && username) {
         if(current_chatroom != "" && current_chatroom) {
             leaveCurrentChatroom()
@@ -62,7 +64,6 @@ function addAvatarRadio() {
         }
         avatar_image.click({input_color: avatarColors[i]}, function(event){
             selected_color = event.data.input_color
-            console.log(selected_color)
             $(".selected-avatar").removeClass("selected-avatar")
             $("#"+selected_color + "-avatar-img").addClass("selected-avatar")
         })
@@ -70,7 +71,7 @@ function addAvatarRadio() {
     }
 }
 
-init();
+
 
 
 function sendLogin(){

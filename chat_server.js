@@ -14,12 +14,18 @@ let chatroomsDict = {}
 let chatroomsList = []
 
 class Chatroom {
-    constructor(room_name, owner) {
+    constructor(room_name, owner, password) {
         this.owner = owner
         this.room_name = room_name
         this.current_users = []
+        this.banned_users = []
+        this.password = password
         chatroomsDict[room_name] = this;
-        chatroomsList.push(room_name)
+        let passExists = false;
+        if(password != "") {
+            passExists = true;
+        }
+        chatroomsList.push([room_name, passExists])
     }
 }
 //servers <- contains owner, ban list, present users
@@ -103,17 +109,29 @@ io.sockets.on("connection", function (socket) {
 
         socket.on("create_chatroom_to_server", function(data) {
             console.log("New chat created by " + data["username"] + " with chat name " + data["chat_name"]);
-            newChatroom = new Chatroom(data["chat_name"], data["username"]);
-            io.sockets.emit("create_chatroom_to_client", {username: data["username"], chatrooms: newChatroom.room_name})
+            newChatroom = new Chatroom(data["chat_name"], data["username"], data["chat_password"]);
+            io.sockets.emit("create_chatroom_to_client", {username: data["username"], chatrooms: newChatroom.room_name, password:data["chat_password"]})
         })
 
-        
         socket.on("join_chatroom_to_server", function(data) {
-            console.log(data["username"] + " joining chatroom " + data["chat_name"]);
             let joinedChatroom = chatroomsDict[data["chat_name"]]
-            joinedChatroom.current_users.push(data["username"])
-            io.sockets.emit("join_chatroom_to_client", {username: data["username"], chatroom: joinedChatroom})
+            if(joinedChatroom) {
+                if(!joinedChatroom.banned_users.includes(data["username"])){
+                    if(joinedChatroom.password == data["password"] || joinedChatroom.password == "") {
+                        console.log(data["username"] + " joining chatroom " + data["chat_name"]);
+                        joinedChatroom.current_users.push(data["username"])
+                        io.sockets.emit("join_chatroom_to_client", {username: data["username"], chatroom: joinedChatroom})
+                    }
+                    else {
+                        io.sockets.emit("incorrect_password_to_client", {username: data["username"], chat_name: data["chat_name"]})
+                    }
+                }
+                else {
+                    io.sockets.emit("user_banned_to_client", {username: data["username"], chat_name: data["chat_name"]})
+                } 
+            }
         }) 
+
         socket.on('message_to_server', function (data) {
             // This callback runs when the server receives a new message from the client.
             console.log("message from " + data["username"] + " to " + data["to_users"] + " in " + data["chatroom"] + ": " + data["message"]); 
@@ -121,16 +139,39 @@ io.sockets.on("connection", function (socket) {
         });
 
         socket.on("leave_chatroom_to_server", function (data) {
-            console.log(data["username"] + " leaving chatroom " + data["chatroom"])
-            let chatroomToLeave = chatroomsDict[data["chatroom"]]
-            let newCurrentUsers = []
-            for(let i = 0; i < chatroomToLeave.current_users.length; ++i) {
-                if(data["username"] != chatroomToLeave.current_users[i]) {
-                    newCurrentUsers.push(chatroomToLeave.current_users[i])
+            console.log(data["username"] + " leaving chatroom " + data["chat_name"])
+            let chatroomToLeave = chatroomsDict[data["chat_name"]]
+            if(chatroomToLeave.owner == data["username"]){
+                io.sockets.emit("leave_chatroom_to_client", {username:"all", chatroom:chatroomToLeave})
+                delete chatroomsDict[data["chat_name"]]
+
+                let newChatroomsList = []
+                for(let i = 0; i < chatroomsList.length; ++i) {
+                    if(data["chat_name"] != chatroomsList[i][0]) {
+                        newChatroomsList.push([chatroomsList[i][0], chatroomsList[i][1]])
+                    }
                 }
+                chatroomsList = newChatroomsList
+                
             }
-            chatroomToLeave.current_users = newCurrentUsers
-            io.sockets.emit("leave_chatroom_to_client", {username:data["username"], chatroom:chatroomToLeave})
+            else {
+                let newCurrentUsers = []
+                for(let i = 0; i < chatroomToLeave.current_users.length; ++i) {
+                    if(data["username"] != chatroomToLeave.current_users[i]) {
+                        newCurrentUsers.push(chatroomToLeave.current_users[i])
+                    }
+                }
+                chatroomToLeave.current_users = newCurrentUsers
+                io.sockets.emit("leave_chatroom_to_client", {username:data["username"], chatroom:chatroomToLeave})
+            }
+            
         })
+
+        socket.on("ban_to_server", function(data) {
+            console.log(data["username"] + " being banned from chatroom " + data["chat_name"]);
+            let joinedChatroom = chatroomsDict[data["chat_name"]]
+            joinedChatroom.banned_users.push(data["username"])
+        })
+
     })
 });
