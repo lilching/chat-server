@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Basic Chatroom</title>   
+    <meta charset="UTF-8">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="all.css">
@@ -44,14 +45,23 @@
         <!-- <div id="message-form-wrapper">
         </div> -->
         <form id="current-chatroom-send-message">
-            <input type="text" id="current-chatroom-message-input" maxlength="80">
+            <input type="text" id="current-chatroom-message-input" maxlength="300">
             <button type="submit">Send</button>
             <br>
             <select id='current-chatroom-users-dropdown'>
-                Send to:
                 <option value="all">Everyone</option>
             </select>
         </form>
+        <div id="current-chatroom-emojis">
+            <img id="evil-emoji" src="/emojis/evil.png" alt="evil emoji">
+            <img id="blushing-emoji" src="/emojis/blushing.png" alt="blushing emoji">
+            <img id="dead-emoji" src="/emojis/dead.png" alt="dead emoji">
+            <img id="angry-emoji" src="/emojis/angry.png" alt="angry emoji">
+            <img id="surprised-emoji" src="/emojis/surprised.png" alt="surprised emoji">
+            <img id="sus-emoji" src="/emojis/sus.png" alt="sus emoji">
+        </div>
+        
+
 
         
         

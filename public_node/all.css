@@ -36,6 +36,13 @@
     margin-left: 50px;
     font-size: 20px;
 }
+.message-div2 {
+    display: inline;
+    font-size: 20px;
+    position: relative;
+    top: -15px;
+    padding: 15px 10px;
+}   
 #current-chatroom-messages {
     max-height: 70vh;
     width: 80%;
@@ -48,4 +55,11 @@
 }
 body {
     margin: 20px;
+}
+#current-chatroom-emojis *{
+    width: 70px;
+    margin: 10px;
+}
+.message-emoji {
+    width: 50px;
 }

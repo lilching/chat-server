@@ -1,28 +1,13 @@
 var socketio = io.connect()
 let avatarColors = ["black", "blue", "brown", "cyan", "green", "lime", "orange", "pink", "purple", "red", "white", "yellow"]
+let emojis = ["angry", "surprised", "blushing", "dead", "evil", "sus"]
 let selected_color = "black" 
 let username = ""
 let current_chatroom = ""
 
-// $(window).bind('beforeunload', function() {
-//     alert("Hello!!! Refreshing")
-// })
-
-// if (1 == event.currentTarget.performance.navigation.type){
-//     alert("Hello!!! Refreshing")
-// }
-
-// if(sessionStorage.reload) { 
-//     sessionStorage.reload = true;
-//     // alert("Hello!!! Refreshing")
-//     sendLeaveAndLogout();
-// } else {
-//     alert("Hello!!! not refreshing")
-//     sessionStorage.setItem('reload', false);
-// }
-
 init();
 
+//init runs on start. Makes sure the correct things are visible on the html, as well as sets up preliminary event listeners
 function init() {
     $("#chatrooms").hide()
     $("#logged-in-as").hide()
@@ -42,19 +27,16 @@ function init() {
         event.preventDefault();
         sendCreateNewChat();
     })
+    for(let i = 0; i < emojis.length; ++i) {
+        $("#"+emojis[i]+"-emoji").click(function(event) {
+            event.preventDefault()
+            socketio.emit("emoji_to_server", {username: username, chatroom:current_chatroom, emoji:$("#"+emojis[i]+"-emoji").attr('src'), to_users:$("#current-chatroom-users-dropdown").val()});
+        })
+    }
 }
 
-function sendLeaveAndLogout() {
-    if(username != "" && username) {
-        if(current_chatroom != "" && current_chatroom) {
-            leaveCurrentChatroom()
-        }
-        socketio.emit("logout_to_server", {username:username, chatroom:current_chatroom})
-    } 
-}
-
-function addAvatarRadio() {
-    
+//inserts the avatar options as a 'radio' (not a real radio form element but established in a similar manual way with a red border on the selected avatar)
+function addAvatarRadio() {    
     radioDiv = $("#avatar-choice-radio-div")
     for(let i = 0; i < avatarColors.length; ++i) {
         //radioDiv.append($("<input type='radio' name='avatar' value='" + avatarColors[i] + "'>" + "<img class='avatar-img' src='avatars/" + avatarColors[i] + ".png' alt='avatar'>"))
@@ -72,12 +54,12 @@ function addAvatarRadio() {
 }
 
 
-
-
+//send the login attempt to the server
 function sendLogin(){
     socketio.emit("login_to_server", {username:username, color:selected_color})
 }
 
+//makes sure hte username is not blank or a space
 function checkUsername(event){
     username = $("#username-input").val().trim()
     event.preventDefault()
@@ -89,6 +71,7 @@ function checkUsername(event){
     }
 }
 
+//if a user is successfully logged in, then display the appropriate things and get the list of chatrooms
 function login(event) {
     event.preventDefault()
     sendLogin()
