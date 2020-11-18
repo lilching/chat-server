@@ -1,0 +1,26 @@
+{
+  "name": "module6group",
+  "version": "1.0.0",
+  "description": "Laney Ching 463883 Ethan Sauerberg 466408",
+  "main": "chat_server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cse330-fall-2020/module6-group-module6-463883-466408.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cse330-fall-2020/module6-group-module6-463883-466408/issues"
+  },
+  "homepage": "https://github.com/cse330-fall-2020/module6-group-module6-463883-466408#readme",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "http": "0.0.1-security",
+    "mime": "^2.4.6",
+    "path": "^0.12.7",
+    "url": "^0.11.0"
+  }
+}
